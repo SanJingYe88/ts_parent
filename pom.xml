@@ -13,6 +13,7 @@
         <module>ts_base</module>
         <module>ts_recruit</module>
         <module>ts_qa</module>
+        <module>ts_article</module>
     </modules>
 
     <properties>
