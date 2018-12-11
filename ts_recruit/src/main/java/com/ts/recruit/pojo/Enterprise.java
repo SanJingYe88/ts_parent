@@ -10,6 +10,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
 
+/**
+ * 企业类
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

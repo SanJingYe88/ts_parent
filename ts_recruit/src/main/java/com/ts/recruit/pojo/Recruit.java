@@ -11,6 +11,9 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 职位类
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
