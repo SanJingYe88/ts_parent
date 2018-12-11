@@ -12,6 +12,7 @@
         <module>ts_common</module>
         <module>ts_base</module>
         <module>ts_recruit</module>
+        <module>ts_qa</module>
     </modules>
 
     <properties>
@@ -39,6 +40,11 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-web</artifactId>
+                <version>2.0.3.RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
                 <version>2.0.3.RELEASE</version>
             </dependency>
         </dependencies>
