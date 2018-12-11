@@ -11,6 +11,7 @@
     <modules>
         <module>ts_common</module>
         <module>ts_base</module>
+        <module>ts_recruit</module>
     </modules>
 
     <properties>
