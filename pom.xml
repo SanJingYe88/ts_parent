@@ -14,6 +14,7 @@
         <module>ts_recruit</module>
         <module>ts_qa</module>
         <module>ts_article</module>
+        <module>ts_gathering</module>
     </modules>
 
     <properties>
