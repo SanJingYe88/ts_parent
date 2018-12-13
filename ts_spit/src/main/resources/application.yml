@@ -1,0 +1,12 @@
+server:
+  port: 9006
+
+spring:
+  application:
+    name: ts_spit
+  data:
+    mongodb:
+      host: 127.0.0.1
+      port: 27017
+      database: ts_spit   #数据库
+
