@@ -24,6 +24,9 @@ public class CommentController {
      */
     @PostMapping
     public Result add(@RequestBody Comment comment) {
+
+        //TODO:获取用户信息,设置进comment里面去
+
         commentService.add(comment);
         return new Result(true, StatusCode.OK, "增加成功");
     }
@@ -35,7 +38,7 @@ public class CommentController {
      * @param page
      * @param size
      */
-    @GetMapping(value = "/article/{articleid}/page/size")
+    @GetMapping(value = "/article/{articleid}/{page}/{size}")
     public PageResult<Comment> findByArticleid(@PathVariable String articleid,
                                                @PathVariable int page, @PathVariable int size) {
         Page<Comment> data = commentService.findByArticleid(articleid,page,size);
@@ -47,7 +50,7 @@ public class CommentController {
      *
      * @param _id
      */
-    @DeleteMapping(value = "/{id}")
+    @DeleteMapping(value = "/{_id}")
     public Result deleteCommentBy_id(@PathVariable String _id){
         commentService.deleteCommentBy_id(_id);
         return new Result(true, StatusCode.OK, "删除成功");

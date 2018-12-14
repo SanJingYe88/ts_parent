@@ -71,7 +71,7 @@ public class LabelService {
     }
 
     //构造查询条件
-    private Specification<Label> createSpecification(Map map) {
+    private Specification<Label> createSpecification(final Map map) {
         return new Specification<Label>() {
             @Override
             public Predicate toPredicate(Root<Label> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {

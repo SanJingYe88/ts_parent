@@ -12,7 +12,6 @@ import java.util.List;
 
 /**
  * 数据访问接口
- *
  */
 public interface ArticleDao extends JpaRepository<Article, String>, JpaSpecificationExecutor<Article> {
 
@@ -27,4 +26,10 @@ public interface ArticleDao extends JpaRepository<Article, String>, JpaSpecifica
     @Transactional(readOnly = false)
     @Query(value = "update tb_article set thumbup = thumbup + 1 where id = ?1", nativeQuery = true)
     void updateThumbupById(String id);
+
+    //文章评论数 +1 / -1
+    @Modifying
+    @Transactional
+    @Query(value = "update tb_article set comment = comment + ?2 where id = ?1", nativeQuery = true)
+    void updateComment(String id, int num);
 }

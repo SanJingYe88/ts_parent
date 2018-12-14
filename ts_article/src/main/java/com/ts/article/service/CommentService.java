@@ -1,5 +1,6 @@
 package com.ts.article.service;
 
+import com.ts.article.dao.ArticleDao;
 import com.ts.article.dao.CommentDao;
 import com.ts.article.pojo.Comment;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class CommentService {
     @Autowired
     private IdWorker idWorker;
 
+    @Autowired
+    private ArticleDao articleDao;
+
     /**
      * 新增文章评论
      *
@@ -29,7 +33,10 @@ public class CommentService {
         comment.setPublishdate(new Date());
         commentDao.save(comment);
 
-        //TODO:文章评论数+1
+        //文章评论数+1
+        articleDao.updateComment(comment.getArticleid(),1);
+
+        //TODO: 记录操作历史
     }
 
     /**
@@ -48,7 +55,10 @@ public class CommentService {
      * @param _id
      */
     public void deleteCommentBy_id(String _id) {
-        //TODO: 更新文章的评论数
+        //更新文章的评论数
+        //先获取评论所属的文章,再更新其评论数
+        Comment comment = commentDao.findById(_id).get();
+        articleDao.updateComment(comment.getArticleid(),-1);
 
         commentDao.deleteCommentBy_id(_id);
     }
