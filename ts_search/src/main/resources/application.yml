@@ -1,0 +1,9 @@
+server:
+  port: 9007
+spring:
+  application:
+    name: ts-search
+  data:
+    elasticsearch:
+      cluster-nodes: 127.0.0.1:9300 #注意端口 9300
+      cluster-name: my-application  #注意集群名,要和es配置中的一致
