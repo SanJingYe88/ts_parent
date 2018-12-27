@@ -17,7 +17,7 @@
         <module>ts_gathering</module>
         <module>ts_spit</module>
         <module>ts_search</module>
-        <module>ts_user</module>
+        <module>ts_user_admin</module>
     </modules>
 
     <properties>
@@ -68,11 +68,44 @@
                 <version>2.0.3.RELEASE</version>
             </dependency>
             <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-redis</artifactId>
+                <version>2.0.3.RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-amqp</artifactId>
+                <version>2.0.3.RELEASE</version>
+            </dependency>
+            <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt</artifactId>
                 <version>0.9.1</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-security</artifactId>
+                <version>2.0.3.RELEASE</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
+    <build>
+        <plugins>
+            <plugin>
+                <!--可以通过setting中可以修改JavaCompiler版本和在Project Structure可以修改LanguageLevel.
+                但是一旦Maven项目有变化，甚至刷新一下pom.xml，IDEA会重置这些配置.
+                解决办法：在pom.xml中指定maven-compiler-plugin的版本，该版本会同时影响LanguageLevel和JavaCompiler，修改后默认就成了这里设置的版本。
+                -->
+                <!--在多模块工程下，在父工程下执行的插件默认会在其所有的子模块上也执行-->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

@@ -1,0 +1,26 @@
+server: 
+  port: 9008
+spring: 
+  application:  
+    name: ts-user #指定服务名
+  datasource:  
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/ts_user?useUnicode=true&amp;characterEncoding=UTF8
+    username: root
+    password: root
+  jpa: 
+    database: MySQL
+    show-sql: true
+  redis:
+    database: 0
+    host: 192.168.1.102
+    port: 6379
+    timeout: 5000ms
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 3
+        max-wait: 5000ms
+#  rabbitmq:
+#    host: 127.0.0.1
