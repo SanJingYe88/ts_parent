@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.ts.user.pojo.User;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 /**
@@ -24,4 +25,8 @@ public interface UserDao extends JpaRepository<User, String>, JpaSpecificationEx
      * @return
      */
     User findByMobileIs(String mobile);
+
+    @Modifying
+    @Query(nativeQuery = true, value = "UPDATE tb_user SET lastdate = now() WHERE id = ?1")
+    int updateLastdate(String id);
 }

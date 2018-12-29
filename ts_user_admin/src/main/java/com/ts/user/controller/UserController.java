@@ -1,20 +1,26 @@
 package com.ts.user.controller;
 
-import com.ts.user.pojo.Admin;
 import com.ts.user.pojo.User;
 import com.ts.user.service.UserService;
+import com.ts.user.util.JwtUtil;
 import entity.PageResult;
 import entity.Result;
 import entity.StatusCode;
+import exception.PermissionException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+import sun.nio.cs.US_ASCII;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * 控制器层
  */
+@Slf4j
 @RestController
 @CrossOrigin
 @RequestMapping("/user")
@@ -23,18 +29,32 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private HttpServletRequest request;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+
     /**
      * 登录
+     * 该方法需要 token
+     *
      * @param map 输入的用户名和密码
-     * @return 登录成功,返回 admin 对象
+     * @return 登录成功, 返回 admin 对象
      */
     @PostMapping(value = "/login")
-    public Result login(@RequestBody Map<String,String> map){
+    public Result login(@RequestBody Map<String, String> map) {
         //根据手机号和密码登录
-        User user = userService.login(map.get("mobile"),map.get("password"));
-        return new Result(true,StatusCode.OK,"登录成功",user);
+        User user = userService.login(map.get("mobile"), map.get("password"));
+        //生成token
+        String token = jwtUtil.createToken(user.getId(), user.getNickname(), "user");
+        Map<String, Object> data = new HashMap<>();
+        data.put("token", token);
+        data.put("nickname", user.getNickname());
+        data.put("avatar", user.getAvatar());
+        return new Result(true, StatusCode.OK, "登录成功", data);
     }
-
 
     /**
      * 用户注册, 验证码已经发送
@@ -61,7 +81,7 @@ public class UserController {
         //检测该手机号是否已经被注册
         int result = userService.checkMobileIsRegistered(mobile);
 
-        if (result == 0){
+        if (result == 0) {
             return new Result(false, StatusCode.ERROR, "该手机号已经注册过了");
         }
 
@@ -88,9 +108,12 @@ public class UserController {
      */
     @GetMapping(value = "/{id}")
     public Result findById(@PathVariable String id) {
-        return new Result(true, StatusCode.OK, "查询成功", userService.findById(id));
+        User user = userService.findById(id);
+        if (user == null) {
+            return new Result(true, StatusCode.NOT_FOUND, "查询成功");
+        }
+        return new Result(true, StatusCode.OK, "查询成功", user);
     }
-
 
     /**
      * 分页+多条件查询
@@ -103,7 +126,7 @@ public class UserController {
     @RequestMapping(value = "/search/{page}/{size}", method = RequestMethod.POST)
     public Result findSearch(@RequestBody Map searchMap, @PathVariable int page, @PathVariable int size) {
         Page<User> pageList = userService.findSearch(searchMap, page, size);
-        return new Result(true, StatusCode.OK, "查询成功", new PageResult<User>(pageList.getTotalElements(), pageList.getContent()));
+        return new Result(true, StatusCode.OK, "查询成功", new PageResult<>(pageList.getTotalElements(), pageList.getContent()));
     }
 
     /**
@@ -112,7 +135,7 @@ public class UserController {
      * @param searchMap
      * @return
      */
-    @RequestMapping(value = "/search", method = RequestMethod.POST)
+    @PostMapping(value = "/search")
     public Result findSearch(@RequestBody Map searchMap) {
         return new Result(true, StatusCode.OK, "查询成功", userService.findSearch(searchMap));
     }
@@ -122,33 +145,60 @@ public class UserController {
      *
      * @param user
      */
-    @RequestMapping(method = RequestMethod.POST)
+    @PostMapping
     public Result add(@RequestBody User user) {
         userService.add(user);
         return new Result(true, StatusCode.OK, "增加成功");
     }
 
     /**
-     * 修改
+     * 修改用户信息
+     * 该方法需要 token
      *
      * @param user
      */
-    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    @PutMapping(value = "/{id}")
     public Result update(@RequestBody User user, @PathVariable String id) {
+        //先检查权限
+        checkPermission("user");
         user.setId(id);
-        userService.update(user);
+        user = userService.update(user);
+        if (user == null){
+            return new Result(true, StatusCode.NOT_FOUND, "出错了");
+        }
+        //重新签发令牌
+        String token = jwtUtil.createToken(user.getId(), user.getNickname(), "user");
+        Map<String, Object> data = new HashMap<>();
+        data.put("token", token);
+        data.put("nickname", user.getNickname());
+        data.put("avatar", user.getAvatar());
         return new Result(true, StatusCode.OK, "修改成功");
     }
 
     /**
-     * 删除
+     * 删除指定用户
      *
-     * @param id
+     * @param id 用户id
      */
-    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/{id}")
     public Result delete(@PathVariable String id) {
+        //先检查权限
+        checkPermission("admin");
         userService.deleteById(id);
         return new Result(true, StatusCode.OK, "删除成功");
     }
 
+    /**
+     * 权限检查
+     *
+     * @param needRole 需要的角色
+     */
+    private void checkPermission(String needRole) {
+        //获取角色
+        String hasRole = (String) request.getAttribute("roles");
+        log.info("hasRole={}", hasRole);
+        if (hasRole == null || !hasRole.equals(needRole)) {
+            throw new PermissionException("权限不足");
+        }
+    }
 }

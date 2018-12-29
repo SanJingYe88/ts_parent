@@ -24,3 +24,7 @@ spring:
         max-wait: 5000ms
 #  rabbitmq:
 #    host: 127.0.0.1
+
+jwt:
+  key: kkkkkkkkk    #jwt.key
+  ttl: 600000   #jwt.ttl 十分钟

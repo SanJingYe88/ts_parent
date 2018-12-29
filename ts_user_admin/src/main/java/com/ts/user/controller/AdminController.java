@@ -2,6 +2,7 @@ package com.ts.user.controller;
 
 import com.ts.user.pojo.Admin;
 import com.ts.user.service.AdminService;
+import com.ts.user.util.JwtUtil;
 import entity.PageResult;
 import entity.Result;
 import entity.StatusCode;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 /**
  * 控制器层
@@ -22,6 +24,9 @@ public class AdminController {
 	@Autowired
 	private AdminService adminService;
 
+	@Autowired
+	private JwtUtil jwtUtil;
+
 	/**
 	 * 登录
 	 * @param map 输入的用户名和密码
@@ -30,7 +35,12 @@ public class AdminController {
 	@PostMapping(value = "/login")
 	public Result login(@RequestBody Map<String,String> map){
 		Admin adminInDB = adminService.login(map.get("loginname"),map.get("password"));
-		return new Result(true,StatusCode.OK,"登录成功",adminInDB);
+		//生成token
+		String token = jwtUtil.createToken(adminInDB.getId(), adminInDB.getLoginname(), "admin");
+		Map<String, Object> data = new HashMap<>();
+		data.put("token", token);
+		data.put("loginname", adminInDB.getLoginname());
+		return new Result(true, StatusCode.OK, "登录成功", data);
 	}
 
 	
@@ -107,5 +117,4 @@ public class AdminController {
 		adminService.deleteById(id);
 		return new Result(true,StatusCode.OK,"删除成功");
 	}
-	
 }
