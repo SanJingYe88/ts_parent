@@ -111,7 +111,7 @@ public class ReplyService {
 	 * @param searchMap
 	 * @return
 	 */
-	private Specification<Reply> createSpecification(Map searchMap) {
+	private Specification<Reply> createSpecification(final Map searchMap) {
 
 		return new Specification<Reply>() {
 

@@ -78,15 +78,16 @@ public class ProblemService {
 	 * @return
 	 */
 	public Problem findById(String id) {
-		return problemDao.findById(id).get();
+		return problemDao.findById(id).orElse(null);
 	}
 
 	/**
 	 * 增加
+	 *
 	 * @param problem
 	 */
 	public void add(Problem problem) {
-		problem.setId( idWorker.nextId()+"" );
+		problem.setId(idWorker.nextId() + "");
 		problemDao.save(problem);
 	}
 
@@ -111,7 +112,7 @@ public class ProblemService {
 	 * @param searchMap
 	 * @return
 	 */
-	private Specification<Problem> createSpecification(Map searchMap) {
+	private Specification<Problem> createSpecification(final Map searchMap) {
 
 		return new Specification<Problem>() {
 

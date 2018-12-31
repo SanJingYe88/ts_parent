@@ -4,10 +4,22 @@ spring:
   application:  
     name: ts-qa #指定服务名
   datasource:  
-    driverClassName: com.mysql.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/ts_qa?useUnicode=true&amp;characterEncoding=UTF8
     username: root
     password: root
+    driver-class-name: com.mysql.jdbc.Driver
   jpa: 
     database: MySQL
     show-sql: true
+eureka:
+  client:
+    #注册进eureka服务列表内
+    register-with-eureka: true
+    #需要去检索其他微服务
+    fetch-registry: true
+    #设置与Eureka Server交互的地址(即 Eureka Server 所在的地址)
+    service-url:
+      defaultZone: http://localhost:6868/eureka/
+  instance:
+    #显示ip地址
+    prefer-ip-address: true

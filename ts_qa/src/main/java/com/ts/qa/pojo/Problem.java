@@ -10,6 +10,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
 
+/**
+ * 问题实体类
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

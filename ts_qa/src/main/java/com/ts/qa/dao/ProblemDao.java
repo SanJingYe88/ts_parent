@@ -34,6 +34,10 @@ public interface ProblemDao extends JpaRepository<Problem,String>,JpaSpecificati
 //            " order by reply desc")
     Page<Problem> findHotListByLabelId(String labelId,int dayBefore,Pageable pageable);
 
-    //等待回答列表
+    //等待回答列表(按照问题发布时间倒序)
+    @Query(value = "select * from tb_Problem" +
+            " where id in ( select problemid from tb_Pl where labelid=?1 )" +
+            " and reply = 0 " +
+            " order by createtime desc",nativeQuery = true)
     Page<Problem> findByLabelIdAndReplyOrderByCreatetimeDesc(String labelId,Long reply,Pageable pageable);
 }
