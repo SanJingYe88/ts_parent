@@ -114,7 +114,7 @@ public class GatheringService {
      * @param searchMap
      * @return
      */
-    private Specification<Gathering> createSpecification(Map searchMap) {
+    private Specification<Gathering> createSpecification(final Map searchMap) {
 
         return new Specification<Gathering>() {
 

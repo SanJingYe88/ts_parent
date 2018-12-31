@@ -23,3 +23,18 @@ eureka:
   instance:
     #显示ip地址
     prefer-ip-address: true
+#开启Hystrix
+#IDEA中报错,但是可以正常使用
+feign:
+  hystrix:
+    enabled: true
+#Hystrix默认的超时时间是1秒，如果超过这个时间尚未响应，将会进入fallback代码。
+#而首次请求往往会比较慢（因为Spring的懒加载机制，要实例化一些类），这个响应时间可能就大于1秒了.
+#所以设置超时时间为5秒
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 5000
