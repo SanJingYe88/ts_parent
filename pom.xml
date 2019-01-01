@@ -19,6 +19,7 @@
         <module>ts_search</module>
         <module>ts_user_admin</module>
         <module>ts_eureka_server</module>
+        <module>ts_manager</module>
     </modules>
 
     <properties>
