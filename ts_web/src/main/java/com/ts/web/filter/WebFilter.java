@@ -1,9 +1,12 @@
 package com.ts.web.filter;
 
 import com.netflix.zuul.ZuulFilter;
+import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.exception.ZuulException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
 @Component
@@ -32,8 +35,18 @@ public class WebFilter extends ZuulFilter{
 
     @Override
     public Object run() throws ZuulException {
-        //过滤器中要执行的代码
         log.info("{}","过滤器 WebFilter...");
+        //网站前台的 token 转发
+        //获取到被zuul包装后的 requestContext 上下文
+        RequestContext requestContext = RequestContext.getCurrentContext();
+        //获取到 request 对象
+        HttpServletRequest request = requestContext.getRequest();
+        //获取头信息
+        String header = request.getHeader("Authorization");
+        if (header != null){
+            //添加
+            requestContext.addZuulRequestHeader("Authorization",header);
+        }
         return null;
     }
 }
