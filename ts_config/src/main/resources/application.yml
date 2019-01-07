@@ -1,0 +1,12 @@
+server:
+  port: 12000
+spring:
+  application:
+    name: ts-config
+  cloud:
+    config:
+      enabled: true
+      server:
+        git:
+          #各个模块的配置文件的git地址
+          uri: https://github.com/SanJingYe88/ts_config.git
