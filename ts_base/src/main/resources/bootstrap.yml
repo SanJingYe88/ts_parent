@@ -1,0 +1,7 @@
+spring:
+  cloud:
+    config:
+      name: base    #配置文件的前缀
+      profile: dev  #配置文件的后置
+      label: master #git分支
+      uri: http://127.0.0.1:12000 #Config Server 的地址
