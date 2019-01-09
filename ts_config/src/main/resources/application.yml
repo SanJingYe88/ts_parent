@@ -10,3 +10,11 @@ spring:
         git:
           #各个模块的配置文件的git地址
           uri: https://github.com/SanJingYe88/ts_config.git
+  rabbitmq: #rabbimq配置
+    host: 192.168.1.112
+    port: 5672
+management: #暴露触发消息总线的地址
+  endpoints:
+    web:
+      exposure:
+        include: bus-refresh

@@ -8,11 +8,15 @@ import entity.StatusCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 
 @Slf4j
 @RestController
@@ -36,6 +40,7 @@ public class LabelController {
     public Result findById(@PathVariable String id) {
         Result result = new Result(true, StatusCode.OK, "查询成功");
         result.setData(labelService.findById(id));
+        log.info("result={}",result);
         return result;
     }
 
@@ -101,4 +106,35 @@ public class LabelController {
         pageResult.setTotal(data.getTotalElements());
         return pageResult;
     }
+
+    @GetMapping("/test")
+    public void test() throws InterruptedException {
+        log.info("{}","----------");
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        CountDownLatch countDownLatch = new CountDownLatch(requestTotal);
+        Semaphore semaphore = new Semaphore(concurrentThreadNum);
+        for (int i = 0; i < requestTotal; i++) {
+            executorService.execute(() -> {
+                try {
+                    semaphore.acquire();
+                    Result result = restTemplate.getForObject("http://ts-base/label/1071765323784523776", Result.class);
+                    log.info("result:{}.", result.getData());
+                    semaphore.release();
+                } catch (InterruptedException e) {
+                    log.error("exception", e);
+                }
+                countDownLatch.countDown();
+            });
+        }
+        countDownLatch.await();
+        executorService.shutdown();
+        log.info("请求完成");
+    }
+
+    @Autowired
+    private RestTemplate restTemplate;
+    // 总的请求个数
+    private static final int requestTotal = 1000;
+    // 同一时刻最大的并发线程的个数
+    private static final int concurrentThreadNum = 20;
 }
