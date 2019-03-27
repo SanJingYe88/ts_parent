@@ -16,4 +16,18 @@ public class MyStringUtils {
         }
         return false;
     }
+
+    /**
+     * 判断多个字符串是否为null或者为空
+     * @param strs
+     * @return true-为null或者为空,false-不为null且不为空
+     */
+    public static boolean isNullOrEmpty(String... strs){
+        for (String str : strs){
+            if (str == null || str.trim().length() == 0){
+                return true;
+            }
+        }
+        return false;
+    }
 }
