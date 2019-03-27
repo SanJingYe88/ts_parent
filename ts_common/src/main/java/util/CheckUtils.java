@@ -1,12 +1,14 @@
 package util;
 
 import exception.CheckException;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+/**
+ * 校验工具类
+ */
 public class CheckUtils {
 
     public static final String CHECK_PARAM_DEFAULT_MSG = "缺少指定参数";
@@ -24,7 +26,16 @@ public class CheckUtils {
     }
 
     /**
-     * 对象判断 null
+     * 对象判断 null, 使用默认的 msg
+     * @param obj
+     * @param args
+     */
+    public static void notNullObj(Object obj,Object... args){
+        notNull(obj,CHECK_PARAM_DEFAULT_MSG,args);
+    }
+
+    /**
+     * 对象判断 null, 使用自定义的 msg
      * @param obj
      * @param msg
      * @param args
