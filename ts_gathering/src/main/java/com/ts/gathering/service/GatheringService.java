@@ -2,12 +2,14 @@ package com.ts.gathering.service;
 
 import com.ts.gathering.dao.GatheringDao;
 import com.ts.gathering.pojo.Gathering;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import util.CheckUtils;
 import util.DateUtils;
 import util.IdWorker;
@@ -16,11 +18,14 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /**
  * Gathering 服务层
  */
+@Slf4j
 @Service
 public class GatheringService {
 
@@ -120,6 +125,8 @@ public class GatheringService {
                 //时间范围查询,要求同时提供开始时间和结束时间.
                 String startTime = (String) searchMap.get("startTime");
                 String endTime = (String) searchMap.get("endTime");
+                log.info("startTime={}",startTime);
+                log.info("endTime={}",endTime);
                 boolean flagA = startTime != null && !"".equals(startTime);
                 boolean flagB = endTime != null && !"".equals(endTime);
                 if (flagA && flagB){        //存在开始时间,且存在结束时间,查询时间范围
@@ -167,5 +174,47 @@ public class GatheringService {
                 return cb.and(predicateList.toArray(new Predicate[predicateList.size()]));
             }
         };
+    }
+
+
+    /**
+     * 文件保存
+     * @param path 文件保存路径
+     * @param file 文件
+     * @return 返回文件路径
+     */
+    public String saveFile(String path, MultipartFile file){
+        //判断文件是否为空
+        CheckUtils.check(file != null,CheckUtils.CHECK_PARAM_DEFAULT_MSG,file);
+        CheckUtils.check(!file.isEmpty(),"文件内容为空",file);
+        //TODO:判断文件格式
+        File filePath = new File(path);
+        log.info("文件保存路径:{}", path);
+        if (!filePath.exists() && !filePath.isDirectory()) {
+            log.info("目录不存在,创建目录:{}", filePath);
+            boolean mkdir = filePath.mkdir();
+            if (!mkdir){
+                throw new RuntimeException("目录创建失败");
+            }
+        }
+        //获取原始文件名称
+        String originalFileName = file.getOriginalFilename();
+        log.info("原始文件名称:{}", originalFileName);
+        //获取文件类型，以最后一个`.`作为标识
+        String type = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
+        log.info("文件类型:{}", type);
+        //设置文件新名字
+        String fileName = idWorker.nextId()+"."+type;
+        log.info("文件新名称:{}", fileName);
+        //在指定路径创建一个文件
+        File targetFile = new File(path, fileName);
+        //将文件保存到服务器指定位置
+        try {
+            file.transferTo(targetFile);
+        } catch (IOException e) {
+            log.info("保存文件发生错误...");
+            throw new RuntimeException("保存文件发生错误");
+        }
+        return path + "/" + fileName;
     }
 }
