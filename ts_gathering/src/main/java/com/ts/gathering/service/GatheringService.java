@@ -77,8 +77,8 @@ public class GatheringService {
         CheckUtils.notNullObj(endTime,gathering.getEndTime());   //结束时间不能为空
         CheckUtils.notNullObj(enrollTime,gathering.getEnrollTime()); //截止时间不能为空
         //判断时间的合理性
-        CheckUtils.check(!DateUtils.before(startTime,endTime),"开始时间不能晚于结束时间",startTime,endTime);
-        CheckUtils.check(!DateUtils.before(enrollTime,startTime),"截止时间不能晚于开始时间",startTime,endTime);
+        CheckUtils.check(DateUtils.before(startTime,endTime),"开始时间不能晚于结束时间",startTime,endTime);
+        CheckUtils.check(DateUtils.before(enrollTime,startTime),"截止时间不能晚于开始时间",startTime,endTime);
         gathering.setId(idWorker.nextId() + "");
         gathering.setState(0);
         gatheringDao.save(gathering);
@@ -215,6 +215,6 @@ public class GatheringService {
             log.info("保存文件发生错误...");
             throw new RuntimeException("保存文件发生错误");
         }
-        return path + "/" + fileName;
+        return fileName;
     }
 }
