@@ -79,10 +79,13 @@ public class UserController {
     @GetMapping(value = "/sendSms/{mobile}")
     public Result sendSms(@PathVariable String mobile) {
         //检测该手机号是否已经被注册
-        int result = userService.checkMobileIsRegistered(mobile);
-
-        if (result == 0) {
+        if (userService.checkMobileIsRegistered(mobile)) {
             return new Result(false, StatusCode.ERROR, "该手机号已经注册过了");
+        }
+
+        //检测用户是否可以发送验证码
+        if (!userService.checkUserCanSendSms(mobile)){
+            return new Result(false, StatusCode.ERROR, "验证码发送频繁,请稍后再试");
         }
 
         //发送验证码

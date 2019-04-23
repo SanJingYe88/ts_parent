@@ -3,6 +3,7 @@ package com.ts.user.service;
 import com.ts.user.dao.UserDao;
 import com.ts.user.pojo.User;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,8 +38,8 @@ public class UserService {
     @Autowired
     private IdWorker idWorker;
 
-//    @Autowired
-//    private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -100,8 +101,10 @@ public class UserService {
         }
 
         if (!code.equals(codeInRedis)) {
-            //删除本次的短信验证码
-            stringRedisTemplate.delete(key);
+            //删除本次的短信验证码,后面参照其他APP注册时的实际情况,发现当用户输错验证码时删除是没必要的,
+            //因为用户输错验证码的情况很常见,每次输错都重发短信验证码的话,用户就绝对很烦,而且会额外增加服务器带宽,
+            //还要消耗短信验证码的发送次数,增加了成本,所以注释掉删除的代码.
+            //stringRedisTemplate.delete(key);
             throw new RuntimeException("短信验证码错误");
         }
         //注册成功后,删除本次的短信验证码,也可以让其自动失效
@@ -139,12 +142,29 @@ public class UserService {
         //如果该key存在,就更新其值.(一个用户已经请求过验证码,这是第二次请求验证码,所以将其key对应的value重新设置)
         //set() 方法可以实现如果有旧值就覆盖
         stringRedisTemplate.opsForValue().set("sms:mobile:" + mobile, code + "", 5, TimeUnit.MINUTES);    //5分钟过期
+        //同时存放一个key,代表该mobile已近发送过验证码了,这个key的有效期是1分钟.
+        stringRedisTemplate.opsForValue().set("sms:send:" + mobile,"1",5, TimeUnit.MINUTES);    //1分钟过期
 
-        //TODO : 将验证码和手机号发送给rabbitmq
-//        Map<String, String> map = new HashMap<>();
-//        map.put("mobile", mobile);
-//        map.put("code", code + "");
-//        rabbitTemplate.convertAndSend("sms", map);
+        //将验证码和手机号发送给rabbitmq
+        Map<String, String> map = new HashMap<>();
+        map.put("mobile", mobile);
+        map.put("code", code + "");
+        rabbitTemplate.convertAndSend("sms", map);
+    }
+
+    /**
+     * 检测用户是否可以发送验证码.
+     * 控制每个用户 每分钟只能发送一条 短信验证码,避免恶意攻击.
+     * @param mobile
+     * @return
+     */
+    public boolean checkUserCanSendSms(String mobile){
+        //检测手机号是否合法
+        if (mobile == null || mobile.length() != 11 || !MobileUtils.checkMobile(mobile)) {
+            throw new RuntimeException("手机号码错误!");
+        }
+        //从redis获取该key,看是否存在,如果存在,则表示暂时不能发送验证码,否则可以发送验证码.
+        return stringRedisTemplate.opsForValue().get("sms:send:" + mobile) == null;
     }
 
 
@@ -152,19 +172,18 @@ public class UserService {
      * 检测该手机号是否已经被注册
      *
      * @param mobile 手机号
-     * @return 0-已被注册,1-还未注册
+     * @return true-已被注册,false-还未注册
      */
-    public int checkMobileIsRegistered(String mobile) {
+    public boolean checkMobileIsRegistered(String mobile) {
         //检测手机号是否合法
         if (mobile == null || mobile.length() != 11 || !MobileUtils.checkMobile(mobile)) {
             throw new RuntimeException("手机号码错误!");
         }
 
-        int num = userDao.countByMobileIs(mobile);
-        if (num > 0) {  //该手机号已被注册
-            return 0;
+        if (userDao.countByMobileIs(mobile) > 0) {  //该手机号已被注册
+            return true;
         }
-        return 1;
+        return false;
     }
 
 
