@@ -56,6 +56,14 @@ public class ManagerFilter extends ZuulFilter{
             return null;
         }
 
+        //如果是文件上传,则不判断.
+        //按时没有更好的解决办法,只能先这样了
+        log.info(request.getHeader("Content-Type"));
+        if(request.getHeader("Content-Type") != null
+                && request.getHeader("Content-Type").contains("multipart/form-data")){
+            return null;
+        }
+
         String header = request.getHeader("Authorization");
         if (MyStringUtils.isNullOrEmpty(header)) {
             noPermission(requestContext);
